@@ -1,0 +1,32 @@
+import { Request, Response } from "express";
+import P_Type, { IP_Type } from "../../models/P_Type";
+
+export default async (req: Request, res: Response) => {
+  try {
+    const code: string = req.params.code;
+
+    if (!code) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Code is required" });
+    }
+
+    const p_type: IP_Type | null = await P_Type.findOne({ code: code });
+
+    if (!p_type) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "Product type not found" });
+    }
+
+    await P_Type.findByIdAndDelete(p_type._id);
+
+    res.json({
+      status: "ok",
+      message: "Product Type deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: "error", message: "Internal Server Error" });
+  }
+};
